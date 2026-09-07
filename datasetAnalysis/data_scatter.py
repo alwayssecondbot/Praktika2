@@ -21,30 +21,24 @@ class DataScatter:
         self.data_set = data_set
 
         self.root.title("Data Scatter")
-        self.root.geometry("600x450")
-        self.root.minsize(600, 400)
 
         self.graph = Figure(dpi = 100)
-        self.axis = self.graph.add_subplot(111)
-
-        self.axis.plot(self.data_set.iloc[:,self.x].tolist(), self.data_set.iloc[:,self.y].tolist(), marker='o', linestyle='None',
-                       color='red')
-        self.axis.set_xlabel(self.data_set.columns[self.x])
-        self.axis.set_ylabel(self.data_set.columns[self.y])
-        self.axis.grid(True)
-
         self.canvas = FigureCanvasTkAgg(self.graph, master = root)
-        self.canvas.draw()
+
+        self.axis = self.graph.add_subplot(111)
+        self.axis.grid(True)
+        self.update_plot()
+
         self.canvas_widget = self.canvas.get_tk_widget()
 
         self.left_frame = tk.Frame(self.root)
         self.bottom_frame = tk.Frame(self.root)
 
         for i in range(self.data_set.shape[1]):
-            button_l = tk.Button(self.left_frame, text = self.data_set.columns[i], command = lambda y = i: self.set_y(y))
+            button_l = tk.Button(self.left_frame, text = self.data_set.columns[i], command = lambda y = i: self.y_column_but(y))
             button_l.pack(padx = 5, pady = 5, fill = 'x')
 
-            button_b = tk.Button(self.bottom_frame, text = self.data_set.columns[i], command = lambda x = i: self.set_x(x))
+            button_b = tk.Button(self.bottom_frame, text = self.data_set.columns[i], command = lambda x = i: self.x_column_but(x))
             button_b.pack(side = 'left', padx = 5, pady = 5)
 
 
@@ -55,11 +49,21 @@ class DataScatter:
         self.root.grid_rowconfigure(0, weight = 1)
         self.root.grid_columnconfigure(1, weight = 1)
 
+        self.root.update_idletasks()
+        self.root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
+
+    def x_column_but(self, x : int) -> None:
+        self.set_x(x)
+        self.update_plot()
+
+    def y_column_but(self, y : int) -> None:
+        self.set_y(y)
+        self.update_plot()
 
     def update_plot(self) -> None:
         self.axis.clear()
-        self.axis.plot(self.data_set.iloc[:,self.x].tolist(),
-                       self.data_set.iloc[:,self.y].tolist())
+        self.axis.plot(self.data_set.iloc[:,self.x].tolist(), self.data_set.iloc[:,self.y].tolist(), marker = '*', linestyle = 'None',
+                       color = 'red')
         self.axis.set_xlabel(self.data_set.columns[self.x])
         self.axis.set_ylabel(self.data_set.columns[self.y])
         self.canvas.draw()
