@@ -1,7 +1,13 @@
 import io
 import pandas as pd
 
-df = pd.read_csv('dataset.csv')
+dataset_path='dataset.csv'
+try:
+    df = pd.read_csv(dataset_path)
+except FileNotFoundError as error:
+    print(f'Dataset not found: {error}')
+    exit(1)
+
 filename = 'report.txt'
 numeric_cols = ['age', 'ejection fraction', 'creatinine phosphokinase', 'ejection fraction.1']
 categorical_columns = ['anaemia', 'diabetes', 'high bp']

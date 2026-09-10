@@ -1,7 +1,7 @@
+import os.path
 import tkinter as tk
 
 import pandas as pd
-import matplotlib as mpl
 from matplotlib.axes import Axes
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
@@ -10,6 +10,7 @@ import dataset
 class DataScatter:
     root : tk.Tk
     data_set : pd.DataFrame
+    last_mod_time : float
     graph : Figure
     axis : Axes
     canvas : FigureCanvasTkAgg
@@ -19,6 +20,7 @@ class DataScatter:
     def __init__(self, root : tk.Tk, data_set : pd.DataFrame) -> None:
         self.root = root
         self.data_set = data_set
+        self.last_mod_time = os.path.getmtime(dataset.dataset_path)
 
         self.root.title("Data Scatter")
 
@@ -52,6 +54,8 @@ class DataScatter:
         self.root.update_idletasks()
         self.root.minsize(root.winfo_reqwidth(), root.winfo_reqheight())
 
+        self.autoupdate()
+
     def x_column_but(self, x : int) -> None:
         self.set_x(x)
         self.update_plot()
@@ -59,6 +63,19 @@ class DataScatter:
     def y_column_but(self, y : int) -> None:
         self.set_y(y)
         self.update_plot()
+
+    def autoupdate(self) -> None:
+        if os.path.exists(dataset.dataset_path):
+            current = os.path.getmtime(dataset.dataset_path)
+            print(f'File {dataset.dataset_path} exists and {self.last_mod_time} comparing to {current}')
+            if self.last_mod_time < current:
+                self.data_set = pd.read_csv(dataset.dataset_path)
+                self.last_mod_time = current
+                self.update_plot()
+
+        self.root.after(2000, self.autoupdate)
+
+        return
 
     def update_plot(self) -> None:
         self.axis.clear()
