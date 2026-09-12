@@ -21,7 +21,7 @@ class DataScatter:
 
     def __init__(self, root : tk.Tk, data_set : pd.DataFrame) -> None:
         self.root = root
-        self.data_set = data_set
+        self.data_set = data_set[dataset.numeric_cols]
         self.last_mod_time = os.path.getmtime(dataset.dataset_path)
 
         self.root.title("Data Scatter")
@@ -75,7 +75,7 @@ class DataScatter:
             current = os.path.getmtime(dataset.dataset_path)
 
             if self.last_mod_time < current:
-                self.data_set = pd.read_csv(dataset.dataset_path)
+                self.data_set = pd.read_csv(dataset.dataset_path)[dataset.numeric_cols]
                 self.last_mod_time = current
                 self.update_plot()
 

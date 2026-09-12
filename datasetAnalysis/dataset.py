@@ -9,7 +9,7 @@ except FileNotFoundError as error:
     exit(1)
 
 filename = 'report.txt'
-numeric_cols = ['age', 'ejection fraction', 'creatinine phosphokinase', 'ejection fraction.1']
+numeric_cols = ['Unnamed: 0', 'age', 'ejection fraction', 'creatinine phosphokinase', 'ejection fraction.1']
 categorical_columns = ['anaemia', 'diabetes', 'high bp']
 
 def displayData(data: list[str], file: str) -> None:
