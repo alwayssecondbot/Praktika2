@@ -67,7 +67,7 @@ class DataScatter:
     def autoupdate(self) -> None:
         if os.path.exists(dataset.dataset_path):
             current = os.path.getmtime(dataset.dataset_path)
-            print(f'File {dataset.dataset_path} exists and {self.last_mod_time} comparing to {current}')
+
             if self.last_mod_time < current:
                 self.data_set = pd.read_csv(dataset.dataset_path)
                 self.last_mod_time = current
