@@ -1,5 +1,7 @@
 import os.path
 import tkinter as tk
+from datetime import datetime
+from tkinter import filedialog
 
 import pandas as pd
 from matplotlib.axes import Axes
@@ -43,10 +45,14 @@ class DataScatter:
             button_b = tk.Button(self.bottom_frame, text = self.data_set.columns[i], command = lambda x = i: self.x_column_but(x))
             button_b.pack(side = 'left', padx = 5, pady = 5)
 
+        self.save_frame = tk.Frame(self.root)
+        save_button = tk.Button(self.save_frame, text = 'Save graph', command = lambda : self.save_plot())
+        save_button.pack(side = 'left', padx = 5, pady = 5)
 
         self.left_frame.grid(row = 0, column = 0, sticky = 'ns')
         self.canvas_widget.grid(row = 0, column = 1, sticky = 'nsew')
         self.bottom_frame.grid(row = 1, column = 1, sticky = 'ew')
+        self.save_frame.grid(row = 1, column = 0, sticky = 'ew')
 
         self.root.grid_rowconfigure(0, weight = 1)
         self.root.grid_columnconfigure(1, weight = 1)
@@ -76,6 +82,17 @@ class DataScatter:
         self.root.after(2000, self.autoupdate)
 
         return
+
+    def save_plot(self) -> None:
+        now = datetime.now()
+        time_str=now.strftime("%H_%M_%S")
+        path = filedialog.asksaveasfilename(
+            defaultextension=".png",
+            filetypes=[("PNG files", "*.png")],
+            initialfile=f'graph{time_str}.png'
+        )
+        if path:
+            self.graph.savefig(fname=path)
 
     def update_plot(self) -> None:
         self.axis.clear()
