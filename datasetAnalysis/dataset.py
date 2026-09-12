@@ -1,9 +1,16 @@
 import io
 import pandas as pd
 
-df = pd.read_csv('dataset.csv')
-filename = 'report.txt'
+dataset_path='dataset.csv'
+try:
+    df = pd.read_csv(dataset_path)
+except FileNotFoundError as error:
+    print(f'Dataset not found: {error}')
+    exit(1)
 
+filename = 'report.txt'
+numeric_cols = ['Unnamed: 0', 'age', 'ejection fraction', 'creatinine phosphokinase', 'ejection fraction.1']
+categorical_columns = ['anaemia', 'diabetes', 'high bp']
 
 def displayData(data: list[str], file: str) -> None:
     with (open(file, 'a', newline='', encoding='utf-8')) as file:
@@ -56,9 +63,7 @@ if __name__ == '__main__':
     displayData(analysis.EmptyRows(), filename)
     displayData([""], filename)
 
-    numeric_cols = ['age', 'ejection fraction', 'creatinine phosphokinase', 'ejection fraction.1']
     displayData(analysis.AvgMedStandDevVal(numeric_cols), filename)
     displayData([""], filename)
 
-    categorical_columns = ['anaemia', 'diabetes', 'high bp']
     displayData(analysis.ListValNFreq(), filename)
