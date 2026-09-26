@@ -18,7 +18,7 @@ from collections import Counter
 
 import dataset
 
-class DataScatter:
+class DataVisual:
     root : tk.Tk
     data_set : pd.DataFrame
     last_mod_time : float
@@ -180,7 +180,7 @@ class DataScatter:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = DataScatter(root, dataset.df)
+    app = DataVisual(root, dataset.df)
     try:
         root.mainloop()
     except KeyboardInterrupt:
