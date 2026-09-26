@@ -133,10 +133,11 @@ class DataVisual:
             if self.data_set.columns[self.x] in dataset.numeric_cols:
                 counts, bins, patches = self.axis.hist(x, bins=10, edgecolor = 'black')
                 norm = colors.Normalize(
-                    vmin=float(counts.min()),
-                    vmax=float(counts.max()),
+                    vmin = float(counts.min()),
+                    vmax = float(counts.max()),
                 )
 
+                self.axis.bar_label(patches, fmt = '%d', padding = 3)
                 for i, patch in enumerate(patches):
                     patch.set_facecolor(cmap(norm(counts[i])))
 
@@ -146,17 +147,30 @@ class DataVisual:
                 self.axis.axis("equal")
 
                 norm = colors.Normalize(
-                    vmin=float(counts.min()),
-                    vmax=float(counts.max()),
+                    vmin = float(counts.min()),
+                    vmax = float(counts.max()),
                 )
 
                 for wedge, clr in zip(wedges, counts):
                     wedge.set_facecolor(cmap(norm(clr)))
 
-
             else:
                 print(f"Error: Column {self.data_set.columns[self.x]} with index {self.x} not found in dataset.")
                 exit(1)
+        elif self.data_set.columns[self.x] in dataset.categorical_columns and self.data_set.columns[self.y] in dataset.numeric_cols:
+            values, counts = np.unique(x, return_counts=True)
+
+            bars = self.axis.bar([str(v) for v in values], counts, edgecolor = 'black', linewidth = 1, )
+
+            values = np.array(values)
+            norm = colors.Normalize(
+                vmin = float(values.min()),
+                vmax = float(values.max()),
+            )
+
+            for bar, val in zip(bars, values):
+                bar.set_facecolor(cmap(norm(val)))
+
         else:
             self.axis.scatter(x, y, marker = '*', cmap = self.style, c = np.hypot(x, y))
 
