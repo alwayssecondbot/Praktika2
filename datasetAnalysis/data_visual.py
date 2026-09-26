@@ -14,9 +14,11 @@ from matplotlib import colors
 
 import numpy as np
 
+from collections import Counter
+
 import dataset
 
-class DataScatter:
+class DataVisual:
     root : tk.Tk
     data_set : pd.DataFrame
     last_mod_time : float
@@ -28,9 +30,6 @@ class DataScatter:
     style : str = 'GnBu'
 
     def __init__(self, root : tk.Tk, data_set : pd.DataFrame) -> None:
-        self.counts = None
-        self.bins = None
-        self.patches = None
         self.root = root
         self.data_set = data_set
         self.last_mod_time = os.path.getmtime(dataset.dataset_path)
@@ -122,20 +121,75 @@ class DataScatter:
 
     def update_graph(self) -> None:
         self.axis.clear()
+        self.axis.set_frame_on(True)
+        self.axis.set_aspect('auto')
 
         x = self.data_set.iloc[:, self.x].tolist()
         y = self.data_set.iloc[:, self.y].tolist()
 
-        if self.x == self.y and self.data_set.columns[self.x] in dataset.numeric_cols:
-            self.counts, self.bins, self.patches = self.axis.hist(x, bins=10, edgecolor = 'black')
-            cmap = colormaps[self.style]
+        cmap = colormaps[self.style]
+
+        if self.x == self.y:
+            if self.data_set.columns[self.x] in dataset.numeric_cols:
+                counts, bins, patches = self.axis.hist(x, bins=10, edgecolor = 'black')
+                norm = colors.Normalize(
+                    vmin = float(counts.min()),
+                    vmax = float(counts.max()),
+                )
+
+                self.axis.bar_label(patches, fmt = '%d', padding = 3)
+                for i, patch in enumerate(patches):
+                    patch.set_facecolor(cmap(norm(counts[i])))
+
+            elif self.data_set.columns[self.x] in dataset.categorical_columns:
+                values, counts = np.unique(x, return_counts=True)
+                wedges, texts = self.axis.pie(counts, labels = values, startangle = 90)
+                self.axis.axis("equal")
+
+                norm = colors.Normalize(
+                    vmin = float(counts.min()),
+                    vmax = float(counts.max()),
+                )
+
+                for wedge, clr in zip(wedges, counts):
+                    wedge.set_facecolor(cmap(norm(clr)))
+
+            else:
+                print(f"Error: Column {self.data_set.columns[self.x]} with index {self.x} not found in dataset.")
+                exit(1)
+        elif self.data_set.columns[self.x] in dataset.numeric_cols and self.data_set.columns[self.y] in dataset.categorical_columns:
+            categories = np.unique(y)
+            data = [self.data_set.loc[
+                        y == c, self.data_set.columns[self.x]
+                    ].to_numpy() for c in categories]
+
+            bp = self.axis.boxplot(data, tick_labels = categories, orientation = "horizontal", patch_artist = True, widths = 0.6)
+
+            boxes = bp['boxes']
+            n = len(boxes)
+
+            palette = cmap(np.linspace(0, 1, n))
+
+            for box, color in zip(boxes, palette):
+                box.set_facecolor(color)
+
+            for median in bp['medians']:
+                median.set_color('black')
+                median.set_linewidth(1.5)
+
+        elif self.data_set.columns[self.x] in dataset.categorical_columns and self.data_set.columns[self.y] in dataset.numeric_cols:
+            values, counts = np.unique(x, return_counts=True)
+
+            bars = self.axis.bar([str(v) for v in values], counts, edgecolor = 'black', linewidth = 1, )
+
+            values = np.array(values)
             norm = colors.Normalize(
-                vmin=float(self.counts.min()),
-                vmax=float(self.counts.max()),
+                vmin = float(values.min()),
+                vmax = float(values.max()),
             )
 
-            for i, patch in enumerate(self.patches):
-                patch.set_facecolor(cmap(norm(self.counts[i])))
+            for bar, val in zip(bars, values):
+                bar.set_facecolor(cmap(norm(val)))
 
         else:
             self.axis.scatter(x, y, marker = '*', cmap = self.style, c = np.hypot(x, y))
@@ -160,7 +214,7 @@ class DataScatter:
 
 if __name__ == "__main__":
     root = tk.Tk()
-    app = DataScatter(root, dataset.df)
+    app = DataVisual(root, dataset.df)
     try:
         root.mainloop()
     except KeyboardInterrupt:
