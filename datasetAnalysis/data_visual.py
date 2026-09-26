@@ -157,6 +157,26 @@ class DataVisual:
             else:
                 print(f"Error: Column {self.data_set.columns[self.x]} with index {self.x} not found in dataset.")
                 exit(1)
+        elif self.data_set.columns[self.x] in dataset.numeric_cols and self.data_set.columns[self.y] in dataset.categorical_columns:
+            categories = np.unique(y)
+            data = [self.data_set.loc[
+                        y == c, self.data_set.columns[self.x]
+                    ].to_numpy() for c in categories]
+
+            bp = self.axis.boxplot(data, tick_labels = categories, orientation = "horizontal", patch_artist = True, widths = 0.6)
+
+            boxes = bp['boxes']
+            n = len(boxes)
+
+            palette = cmap(np.linspace(0, 1, n))
+
+            for box, color in zip(boxes, palette):
+                box.set_facecolor(color)
+
+            for median in bp['medians']:
+                median.set_color('black')
+                median.set_linewidth(1.5)
+
         elif self.data_set.columns[self.x] in dataset.categorical_columns and self.data_set.columns[self.y] in dataset.numeric_cols:
             values, counts = np.unique(x, return_counts=True)
 
